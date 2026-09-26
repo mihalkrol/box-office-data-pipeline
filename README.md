@@ -29,4 +29,9 @@ Work in progress.
 - Movie identity: imdb_id, else title + release_year; re-releases merge by imdb_id
 - distributor in fact (no own attributes, changes between runs)
 - theaters semi-additive
-- genre as string (limitation; bridge table = next step)
+- genre as string
+
+- movie_identity key created - if possible imdbID, else title+year
+- not every day has a release
+
+#after checking - same amount of records fact_revenue vs stg_revenue, and the same revenue SUM.

@@ -11,6 +11,8 @@ Stack: Python, pandas, DuckDB, requests, Streamlit.
 3. Run `pipeline.ipynb` top to bottom. It builds `data/movies.duckdb`.
 4. In the terminal: `streamlit run app.py`
 
+Run in VS Code or Jupiter.
+
 OMDb responses are saved in `data/omdb_raw.json`. If the file exists, there is no API connection, so no API key is needed. To query the API again, delete the file and put your own key in `.env` as `API_KEY=...` (full run ~33 min).
 
 The notebook closes the DuckDB connection at the end. DuckDB allows one writing process or several reading ones, so the dashboard can't open the database while the notebook holds it.

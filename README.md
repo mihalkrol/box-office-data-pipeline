@@ -7,11 +7,11 @@ Stack: Python, pandas, DuckDB, requests, Streamlit.
 ## How to run
 
 1. `python3 -m venv .venv`, `source .venv/bin/activate`, `pip install -r requirements.txt`
-2. Source file in `data/revenues_per_day_fm.csv`
+2. Source file is included in data/revenues_per_day_fm.csv (data provided by Future Mind for this task)
 3. Run `pipeline.ipynb` top to bottom. It builds `data/movies.duckdb`.
 4. In the terminal: `streamlit run app.py`
 
-Run in VS Code or Jupiter.
+Run in VS Code or Jupyter.
 
 OMDb responses are saved in `data/omdb_raw.json`. If the file exists, there is no API connection, so no API key is needed. To query the API again, delete the file and put your own key in `.env` as `API_KEY=...` (full run ~33 min).
 
@@ -48,6 +48,8 @@ stg_series: one row per screening run, 6,634 runs. Sum of revenue is the same in
 - 6,185 of 6,634 runs matched (93.2%), and 98.4% of revenue is from movies matched with an IMDb ID. The 449 unmatched runs are 6.8% of runs but only 1.6% of revenue, so they are mostly small titles.
 
 ## Data model
+
+Diagram: er_futuremind.jpg
 
 Star schema. Grain of the fact: one row per movie per day.
 

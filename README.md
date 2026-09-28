@@ -87,8 +87,6 @@ Checks:
 - the regex covers the main label patterns, a few unusual labels may remain
 - the 365-day gap for splitting runs is an assumption
 
-## Next steps
+## Use of AI
 
-- move the pipeline from the notebook to scripts (or dbt) with one entry point
-- incremental API calls with a cache, retry on errors
-- bridge tables for genre and country
+I used Claude (Anthropic) as a mentor during this task: to explain concepts (gaps and islands, surrogate keys, semi-additive measures), to help with syntax (the regex for release labels, DuckDB functions) and to review my notebook. The Streamlit dashboard code was written with Claude, based on my SQL queries. The data exploration, the data model and the decisions described above are mine, and I can explain every step of the pipeline.

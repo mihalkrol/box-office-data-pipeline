@@ -1,19 +1,32 @@
-# Movie revenue pipeline (OMDb)
+# US Box Office Data Pipeline
 
-Daily US box office revenue per movie, enriched with OMDb metadata, modeled as a star schema in DuckDB, with a Streamlit dashboard on top.
+Daily US box office revenue per movie (2000-2023), enriched with OMDb metadata, modeled as a star schema in DuckDB, with a Streamlit ranking dashboard on top.
 
-Stack: Python, pandas, DuckDB, requests, Streamlit.
+Stack: Python, pandas, DuckDB, SQL, requests, Streamlit.
+
+**Key results**
+- 337,818 daily revenue rows → 6,634 screening runs → 6,521 distinct movies
+- 93.2% of runs matched to OMDb, covering 98.4% of total revenue
+- Revenue totals reconcile across every layer (205,110,995,141 USD in source, staging and fact table)
+
+## Project origin
+
+This project started as a take-home exercise in a data engineering recruitment process: ingest a daily revenue file, enrich it with the OMDb API, design a dimensional model and build a ranking dashboard. I keep developing it as a portfolio project. See [Roadmap](#roadmap) and [CHANGELOG](CHANGELOG.md).
+
+## Data sources
+
+- **Daily box office revenue**: scraped from [Box Office Mojo](https://www.boxofficemojo.com/) and published by the [tjwaterman99/boxofficemojo-scraper](https://github.com/tjwaterman99/boxofficemojo-scraper) project as `revenues_per_day.csv`. This repo uses a snapshot from 2000-01-01 to 2023-03-06 (`data/revenues_per_day.csv`).
+- **Movie metadata**: [OMDb API](https://www.omdbapi.com/), used for personal, non-commercial purposes. `data/omdb_raw.json` caches the API responses, so the pipeline can be reproduced without an API key.
 
 ## How to run
 
+Tested with Python 3.13.
+
 1. `python3 -m venv .venv`, `source .venv/bin/activate`, `pip install -r requirements.txt`
-2. Source file is included in data/revenues_per_day_fm.csv (data provided by Future Mind for this task)
-3. Run `pipeline.ipynb` top to bottom. It builds `data/movies.duckdb`.
-4. In the terminal: `streamlit run app.py`
+2. Run `pipeline.ipynb` top to bottom (VS Code or Jupyter). It builds `data/movies.duckdb`.
+3. In the terminal: `streamlit run app.py`
 
-Run in VS Code or Jupyter.
-
-OMDb responses are saved in `data/omdb_raw.json`. If the file exists, there is no API connection, so no API key is needed. To query the API again, delete the file and put your own key in `.env` as `API_KEY=...` (full run ~33 min).
+No API key is needed: if `data/omdb_raw.json` exists, the pipeline reads it and makes no API calls, and the cells that demo the API are skipped. To query the API again, delete the file and put your own key in `.env` as `API_KEY=...` (full run ~33 min).
 
 The notebook closes the DuckDB connection at the end. DuckDB allows one writing process or several reading ones, so the dashboard can't open the database while the notebook holds it.
 
@@ -49,13 +62,45 @@ stg_series: one row per screening run, 6,634 runs. Sum of revenue is the same in
 
 ## Data model
 
-Diagram: er_futuremind.jpg
-
 Star schema. Grain of the fact: one row per movie per day.
 
-- fact_revenue: id (PK), movie_key (FK), date (FK), revenue, theaters, distributor
-- dim_movie: movie_key (PK), movie_identity, imdbID, title, release_year, rated, runtime, genre, country, imdb_rating
-- dim_date: date (PK), day_of_month, day_of_week, month, quarter, year, is_weekend (generated, not from the csv)
+```mermaid
+erDiagram
+    dim_date ||--o{ fact_revenue : "date"
+    dim_movie ||--o{ fact_revenue : "movie_key"
+
+    fact_revenue {
+        VARCHAR id PK
+        BIGINT movie_key FK
+        DATE date FK
+        BIGINT revenue
+        BIGINT theaters
+        VARCHAR distributor
+    }
+    dim_movie {
+        BIGINT movie_key PK
+        VARCHAR movie_identity UK
+        VARCHAR imdbID
+        VARCHAR title
+        BIGINT release_year
+        VARCHAR rated
+        INTEGER runtime
+        VARCHAR genre
+        VARCHAR country
+        FLOAT imdb_rating
+    }
+    dim_date {
+        DATE date PK
+        BIGINT day_of_month
+        VARCHAR day_of_week
+        BIGINT month
+        BIGINT quarter
+        BIGINT year
+        BOOLEAN is_weekend
+    }
+```
+
+dim_date is generated, not taken from the csv.
 
 Decisions:
 - Movie identity: imdbID if possible, else title + release_year. Runs with the same imdbID (re-releases) become one movie. 6,634 runs → 6,521 movies, 6,072 with imdbID.
@@ -87,6 +132,18 @@ Checks:
 - the regex covers the main label patterns, a few unusual labels may remain
 - the 365-day gap for splitting runs is an assumption
 
+## Roadmap
+
+- [x] **v1.0** End-to-end pipeline in a notebook, star schema in DuckDB, Streamlit dashboard
+- [ ] **v2.0** Move the pipeline from the notebook to dbt (dbt-duckdb): staging and mart models, the checks above as dbt tests
+- [ ] **v2.0** Load the source file from the scraper's public release instead of a committed copy
+- [ ] **v2.1** Bridge tables for genre and country (many-to-many)
+- [ ] **v2.1** Public deployment of the dashboard
+
 ## Use of AI
 
-I used Claude (Anthropic) as a mentor during this task: to explain concepts (gaps and islands, surrogate keys, semi-additive measures), to help with syntax (the regex for release labels, DuckDB functions) and to review my notebook. The Streamlit dashboard code was written with Claude, based on my SQL queries. The data exploration, the data model and the decisions described above are mine, and I can explain every step of the pipeline.
+I used Claude (Anthropic) as a mentor during this project: to explain concepts (gaps and islands, surrogate keys, semi-additive measures), to help with syntax (the regex for release labels, DuckDB functions) and to review my notebook. The Streamlit dashboard code was written with Claude, based on my SQL queries. The data exploration, the data model and the decisions described above are mine, and I can explain every step of the pipeline.
+
+## License
+
+Code: MIT (see [LICENSE](LICENSE)). Data belongs to its sources listed above.

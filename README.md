@@ -1,22 +1,17 @@
 # US Box Office Data Pipeline
 
-Daily US box office revenue per movie (2000-2023), enriched with OMDb metadata, modeled as a star schema in DuckDB, with a Streamlit ranking dashboard on top.
+Daily US box office revenue per movie (2000-2023), enriched with OMDb metadata, modeled as a star schema in DuckDB, with a Streamlit dashboard on top.
 
 Stack: Python, pandas, DuckDB, SQL, requests, Streamlit.
 
-**Key results**
-- 337,818 daily revenue rows → 6,634 screening runs → 6,521 distinct movies
-- 93.2% of runs matched to OMDb, covering 98.4% of total revenue
-- Revenue totals reconcile across every layer (205,110,995,141 USD in source, staging and fact table)
+The main problem: a title is not a movie, because remakes and re-releases share titles. After splitting titles into screening runs, 93.2% of runs matched OMDb, which covers 98.4% of revenue.
 
-## Project origin
-
-This project started as a take-home exercise in a data engineering recruitment process: ingest a daily revenue file, enrich it with the OMDb API, design a dimensional model and build a ranking dashboard. I keep developing it as a portfolio project. See [Roadmap](#roadmap) and [CHANGELOG](CHANGELOG.md).
+It started as a take-home task in a data engineering recruitment process. I keep working on it, plans are in the Roadmap at the bottom.
 
 ## Data sources
 
-- **Daily box office revenue**: scraped from [Box Office Mojo](https://www.boxofficemojo.com/) and published by the [tjwaterman99/boxofficemojo-scraper](https://github.com/tjwaterman99/boxofficemojo-scraper) project as `revenues_per_day.csv`. This repo uses a snapshot from 2000-01-01 to 2023-03-06 (`data/revenues_per_day.csv`).
-- **Movie metadata**: [OMDb API](https://www.omdbapi.com/), used for personal, non-commercial purposes. `data/omdb_raw.json` caches the API responses, so the pipeline can be reproduced without an API key.
+- Revenue: Box Office Mojo, from [tjwaterman99/boxofficemojo-scraper](https://github.com/tjwaterman99/boxofficemojo-scraper) (revenues_per_day.csv), snapshot 2000-01-01 to 2023-03-06.
+- Metadata: [OMDb API](https://www.omdbapi.com/), personal non-commercial use. data/omdb_raw.json keeps the API responses, so you don't need a key.
 
 ## How to run
 
@@ -134,11 +129,11 @@ Checks:
 
 ## Roadmap
 
-- [x] **v1.0** End-to-end pipeline in a notebook, star schema in DuckDB, Streamlit dashboard
-- [ ] **v2.0** Move the pipeline from the notebook to dbt (dbt-duckdb): staging and mart models, the checks above as dbt tests
-- [ ] **v2.0** Load the source file from the scraper's public release instead of a committed copy
-- [ ] **v2.1** Bridge tables for genre and country (many-to-many)
-- [ ] **v2.1** Public deployment of the dashboard
+- [x] v1.0: notebook pipeline, star schema in DuckDB, dashboard
+- [ ] v2.0: move the pipeline to dbt (dbt-duckdb), checks as dbt tests
+- [ ] v2.0: download the source file instead of keeping a copy in the repo
+- [ ] v2.1: bridge tables for genre and country
+- [ ] v2.1: dashboard online
 
 ## Use of AI
 

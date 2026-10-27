@@ -8,6 +8,8 @@ The main problem: a title is not a movie, because remakes and re-releases share 
 
 It started as a take-home task in a data engineering recruitment process. I keep working on it, plans are in the Roadmap at the bottom.
 
+![Dashboard: top movies and revenue per year](docs/dashboard.png)
+
 ## Data sources
 
 - Revenue: Box Office Mojo, from [tjwaterman99/boxofficemojo-scraper](https://github.com/tjwaterman99/boxofficemojo-scraper) (revenues_per_day.csv), snapshot 2000-01-01 to 2023-03-06.
